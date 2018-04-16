@@ -6,7 +6,7 @@ var colors = require('colors/safe'),
     opener = require('opener');
     
 module.exports = {
-  run: function (argv) {
+  start: function (argv) {
     var ifaces = os.networkInterfaces();
 
     if (argv.h || argv.help) {
@@ -150,6 +150,11 @@ module.exports = {
             protocol + canonicalHost + ':' + port,
             { command: argv.o !== true ? argv.o : null }
           );
+        }
+
+        // server start up callback
+        if (typeof argv._cb === "function") {
+          argv._cb();
         }
       });
     }

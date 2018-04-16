@@ -1,7 +1,7 @@
 {
-    "name": "@grmn/http-server",
+    "name": "@grmn/web-server",
     "version": "0.0.1",
-    "description": "http server for development use",
+    "description": "web server for development use",
     "scripts": {
         "dev": "run-s dev1",
         "dev1": "node ./main.js"
@@ -14,7 +14,10 @@
         "opener": "~1.4.0",
         "optimist": "0.6.x",
         "portfinder": "^1.0.13",
-        "union": "~0.4.3"
+        "union": "~0.4.3",
+        "http-proxy-middleware": "0.18.0",
+        "express": "4.16.3",
+        "opn": "5.3.0"
     },
     "devDependencies": {
         "npm-run-all": "4.1.2"

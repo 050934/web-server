@@ -2,6 +2,10 @@
     "name": "@grmn/http-server",
     "version": "0.0.1",
     "description": "http server for development use",
+    "scripts": {
+        "dev": "run-s dev1",
+        "dev1": "node ./main.js"
+    },
     "dependencies": {
         "colors": "1.0.3",
         "corser": "~2.0.0",
@@ -11,5 +15,8 @@
         "optimist": "0.6.x",
         "portfinder": "^1.0.13",
         "union": "~0.4.3"
+    },
+    "devDependencies": {
+        "npm-run-all": "4.1.2"
     }
 }

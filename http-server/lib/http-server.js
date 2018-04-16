@@ -102,16 +102,57 @@ function HttpServer(options) {
     defaultExt: this.ext,
     gzip: this.gzip,
     contentType: this.contentType,
-    handleError: typeof options.proxy !== 'string'
+    handleError: false
   }));
 
-  if (typeof options.proxy === 'string') {
-    var proxy = httpProxy.createProxyServer({});
-    before.push(function (req, res) {
+  let proxyOpts = options.proxy;
+  if (typeof proxyOpts === 'string' ||
+    Object.prototype.toString.call(proxyOpts) === "[object Object]") {
+    
+    let proxy = httpProxy.createProxyServer({}),
+        proxyFn,
+        urls;
+    if (typeof proxyOpts === "string") {
+      proxyOpts = {
+        "": proxyOpts
+      };
+    }
+    urls = Object.keys(proxyOpts);
+    urls.forEach(url => {
+      proxyOpts[url] = {
+        reg: url && new RegExp(url),
+        target: proxyOpts[url]
+      };
+    });
+
+    proxyFn = function (req, res, target) {
       proxy.web(req, res, {
-        target: options.proxy,
+        target: target,
         changeOrigin: true
+      }, function (err) {
+        if (err && options.logFn) {
+          err.status = err.status || err.statusCode || 500;
+          options.logFn(req, res, err);
+          res.writeHead(err.status, {
+            "Content-Type": "text/plain;charset=UTF-8"
+          });
+          res.end(`${req.method} ${req.url}, Error (${err.status}): ${err.message}`);
+        }
       });
+    };
+
+    before.push(function (req, res) {
+      for (let i = 0; i < urls.length; i++) {
+        let obj = proxyOpts[urls[i]],
+            reg = obj.reg,
+            target = obj.target;
+
+        if (!reg || reg.test(req.url)) {
+          proxyFn(req, res, target);
+          return;
+        }
+      }
+      res.emit("next");
     });
   }
 
@@ -123,7 +164,10 @@ function HttpServer(options) {
         options.logFn(req, res, err);
       }
 
-      res.end();
+      res.writeHead(err.status, {
+        "Content-Type": "text/plain;charset=UTF-8"
+      });
+      res.end(`${req.method} ${req.url}, Error (${err.status}): ${err.message}`);
     }
   };
 
